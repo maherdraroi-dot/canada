@@ -129,7 +129,7 @@ ${bodyContent}
 </footer>
 <script>
 function openApply(title){
-  window.location.href='https://remotejob09.job4intern.com/pages/job-application';
+  window.location.href='https://ruwmqs-uq.myshopify.com/pages/apply';
 }
 </script>
 </body>
