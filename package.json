@@ -1,7 +1,7 @@
 {
-  "name": "dubai-jobs-portal",
+  "name": "canada-jobs-portal",
   "version": "1.0.0",
-  "description": "Dubai Jobs Portal - 100,000 Job Listings | UAE",
+  "description": "Canada Jobs Portal - 100,000 Job Listings | CA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
