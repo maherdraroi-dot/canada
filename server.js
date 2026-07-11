@@ -162,6 +162,7 @@ ${AD_TOP}
   </div>
 </nav>
 ${bodyContent}
+${AD_BOTTOM}
 <footer>
   &copy; 2025 CANOVA.ca — <strong>100,000 Jobs</strong> across Canada |
   <a href="/jobs">Browse All</a> · <a href="/jobs?type=remote">Remote Jobs</a> · <a href="/sitemap">Sitemap</a>
@@ -242,11 +243,12 @@ app.get('/', (req, res) => {
     <div class="stat"><strong>100+</strong><span>Companies</span></div>
   </div>
 </div>
- ${AD_MIDDLE}
+
 <div class="container">
   <div class="info-box">
     🇨🇦 Canada's most comprehensive job board — browse <strong>50,000 remote jobs</strong> and <strong>50,000 on-site jobs</strong> across all industries.
   </div>
+   ${AD_MIDDLE}
   <h2 style="margin-bottom:1rem;font-size:1.2rem">Featured Jobs</h2>
   <div class="page-grid">${cards}</div>
   <div style="text-align:center;margin-top:2rem">
