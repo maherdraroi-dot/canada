@@ -181,7 +181,7 @@ ${AD_BOTTOM}
 </footer>
 <script>
 function openApply(title){
-  window.location.href='https://rightwing-production.up.railway.app/apply-now';
+  window.location.href='https://rightwing-production.up.railway.app/apply-now.html';
 }
 </script>
 </body>
