@@ -162,6 +162,9 @@ ${AD_TOP}
     <a href="/sitemap">Sitemap</a>
   </div>
 </nav>
+<!-- Center Ad Start -->
+<div style="display:flex; justify-content:center; margin:20px 0;">
+    <div>
 <script>
   atOptions = {
     'key' : 'd1b072857c7132ec474a48b3413701e2',
@@ -172,7 +175,8 @@ ${AD_TOP}
   };
 </script>
 <script src="https://www.highperformanceformat.com/d1b072857c7132ec474a48b3413701e2/invoke.js"></script>
-
+</div>
+</div>
 ${bodyContent}
 ${AD_BOTTOM}
 <footer>
