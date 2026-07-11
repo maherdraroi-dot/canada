@@ -161,7 +161,17 @@ ${AD_TOP}
     <a href="/sitemap">Sitemap</a>
   </div>
 </nav>
-${AD_MIDDLE}
+<script>
+  atOptions = {
+    'key' : 'd1b072857c7132ec474a48b3413701e2',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/d1b072857c7132ec474a48b3413701e2/invoke.js"></script>
+
 ${bodyContent}
 ${AD_BOTTOM}
 <footer>
