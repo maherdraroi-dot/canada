@@ -6,6 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(compression());
+app.use(express.static(__dirname)); // ✅ This serves apply-now.html
 app.use(express.static('public'));
 
 // ─── AD CONFIGURATION ──────────────────────────────────────────────────────────
