@@ -21,8 +21,8 @@ const AD_TOP = `
       'width' : 728,
       'params' : {}
     };
-  </script>
-  <script src="https://www.highperformanceformat.com/72b6f3ac3fc2f43722e5f2196ef85add/invoke.js"></script>
+  <\\/script>
+  <script src="https://www.highperformanceformat.com/72b6f3ac3fc2f43722e5f2196ef85add/invoke.js"><\\/script>
 </div>
 `;
 
@@ -36,8 +36,8 @@ const AD_MIDDLE = `
       'width' : 468,
       'params' : {}
     };
-  </script>
-  <script src="https://www.highperformanceformat.com/d1b072857c7132ec474a48b3413701e2/invoke.js"></script>
+  <\\/script>
+  <script src="https://www.highperformanceformat.com/d1b072857c7132ec474a48b3413701e2/invoke.js"><\\/script>
 </div>
 `;
 
@@ -51,8 +51,8 @@ const AD_BOTTOM = `
       'width' : 728,
       'params' : {}
     };
-  </script>
-  <script src="https://www.highperformanceformat.com/72b6f3ac3fc2f43722e5f2196ef85add/invoke.js"></script>
+  <\\/script>
+  <script src="https://www.highperformanceformat.com/72b6f3ac3fc2f43722e5f2196ef85add/invoke.js"><\\/script>
 </div>
 `;
 
@@ -421,7 +421,7 @@ ${AD_TOP}
       </div>
       <div class="form-group">
         <label>Cover Letter</label>
-        <textarea name="coverLetter" placeholder="Write a brief cover letter explaining why you're the right fit for this role..."></textarea>
+        <textarea name="coverLetter" placeholder="Write a brief cover letter explaining why you are the right fit for this role..."></textarea>
       </div>
       <div class="form-group">
         <label>How did you hear about us?</label>
@@ -517,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
       'University': formData.get('university') || 'Not provided'
     };
     for (const [key, value] of Object.entries(fields)) {
-      html += `<div><strong>${key}:</strong></div><div>${value || 'Not provided'}</div>`;
+      html += '<div><strong>' + key + ':</strong></div><div>' + (value || 'Not provided') + '</div>';
     }
     html += '</div>';
     container.innerHTML = html;
@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   updateForm();
 });
-</script>
+<\\/script>
 </body>
 </html>`;
 }
@@ -653,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function() {
     clearInterval(countdownInterval);
   });
 });
-</script>
+<\\/script>
 </body>
 </html>`;
 }
@@ -758,13 +758,13 @@ function renderQuestion() {
   document.getElementById('submitQuizBtn').style.display = currentQ === quizQuestions.length - 1 ? 'inline-block' : 'none';
 
   const val = answers[currentQ] || '';
-  area.innerHTML = `
-    <div class="question-number">Question ${currentQ + 1}</div>
-    <div class="question-text">${q.q}</div>
+  area.innerHTML = \`
+    <div class="question-number">Question \${currentQ + 1}</div>
+    <div class="question-text">\${q.q}</div>
     <textarea style="width:100%;padding:14px;border-radius:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);color:#e0e0e0;font-size:0.95rem;min-height:120px;font-family:inherit;outline:none;resize:vertical;" 
-      oninput="saveAnswer(${currentQ}, this.value)" 
-      placeholder="Type your answer here...">${val}</textarea>
-  `;
+      oninput="saveAnswer(\${currentQ}, this.value)" 
+      placeholder="Type your answer here...">\${val}</textarea>
+  \`;
 }
 
 function saveAnswer(idx, value) { answers[idx] = value; }
@@ -783,20 +783,20 @@ function submitQuiz() {
   clearInterval(timerInterval);
   const mins = Math.floor(timerSeconds / 60);
   const secs = timerSeconds % 60;
-  const timeStr = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  const timeStr = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
   const area = document.getElementById('questionArea');
-  area.innerHTML = `
+  area.innerHTML = \`
     <div class="result-container">
       <div class="score-circle">
         <span class="score-number">✅</span>
         <span class="score-label">Completed</span>
       </div>
-      <div class="result-message">🎉 Great job! You've completed the quiz.</div>
-      <div class="result-detail">You've answered all ${quizQuestions.length} questions thoughtfully.</div>
-      <div class="time-taken">⏱ Time taken: ${timeStr}</div>
+      <div class="result-message">🎉 Great job! You have completed the quiz.</div>
+      <div class="result-detail">You have answered all \${quizQuestions.length} questions thoughtfully.</div>
+      <div class="time-taken">⏱ Time taken: \${timeStr}</div>
       <button class="restart-btn" onclick="restartQuiz()">🔄 Restart Quiz</button>
     </div>
-  `;
+  \`;
   document.getElementById('prevQBtn').style.display = 'none';
   document.getElementById('nextQBtn').style.display = 'none';
   document.getElementById('submitQuizBtn').style.display = 'none';
@@ -819,7 +819,7 @@ function startTimer() {
     timerSeconds++;
     const mins = Math.floor(timerSeconds / 60);
     const secs = timerSeconds % 60;
-    document.getElementById('timerDisplay').textContent = `⏱ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    document.getElementById('timerDisplay').textContent = '⏱ ' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
   }, 1000);
 }
 
@@ -829,7 +829,7 @@ document.getElementById('submitQuizBtn').addEventListener('click', submitQuiz);
 
 startTimer();
 renderQuestion();
-</script>
+<\\/script>
 </body>
 </html>`;
 }
@@ -1118,7 +1118,7 @@ app.get('/sitemap-:num.xml', (req, res) => {
   res.type('application/xml').send(xml);
 });
 
-// ── SITEMAP HTML PAGE ─────────────────────────────────────────────────────────
+// ─── SITEMAP HTML PAGE ─────────────────────────────────────────────────────────
 app.get('/sitemap', (req, res) => {
   const body = `
 <div class="container">
@@ -1164,7 +1164,7 @@ app.get('/sitemap', (req, res) => {
   }));
 });
 
-// ── ROBOTS.TXT ────────────────────────────────────────────────────────────────
+// ─── ROBOTS.TXT ────────────────────────────────────────────────────────────────
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain').send(`User-agent: *
 Allow: /
