@@ -112,7 +112,7 @@ footer a{color:#ffd700}
 .success-msg{display:none;text-align:center;padding:1rem;color:#2e7d32;font-weight:600}
 @media(max-width:600px){.search-bar{flex-direction:column}.stat-bar{gap:1rem}}
 </style>
-<script src="https://pl30292000.effectivecpmnetwork.com/16/d6/02/16d602b431851a9c384b36e89bbc6928.js"></script>
+
 </head>
 <body>
 <nav>
