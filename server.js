@@ -151,6 +151,7 @@ footer a{color:#ffd700}
 
 </head>
 <body>
+${AD_TOP}
 <nav>
   <a class="brand" href="/"><span>CA</span>NOVA<span>.ca</span></a>
   <div class="nav-links">
