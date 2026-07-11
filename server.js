@@ -72,7 +72,7 @@ function renderHTML({ title, meta, bodyContent, schema }) {
 <meta property="og:title" content="${title}"/>
 <meta property="og:description" content="${meta}"/>
 <meta name="robots" content="index, follow"/>
-${schema ? `<script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>` : ''}
+${schema ? `<script type="application/ld+json">${JSON.stringify(schema, null, 2)}<\/script>` : ''}
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#222;line-height:1.6}
@@ -733,7 +733,7 @@ ${AD_TOP}
 </div>
 ${AD_BOTTOM}
 <script>
-const quizQuestions = [
+var quizQuestions = [
   { q: "What is your greatest strength in a professional setting?", type: "text" },
   { q: "Describe a challenging situation you overcame.", type: "text" },
   { q: "Where do you see yourself in 5 years?", type: "text" },
@@ -741,14 +741,14 @@ const quizQuestions = [
   { q: "Why do you want to join this company?", type: "text" }
 ];
 
-let currentQ = 0;
-let answers = {};
-let timerSeconds = 0;
-let timerInterval = null;
+var currentQ = 0;
+var answers = {};
+var timerSeconds = 0;
+var timerInterval = null;
 
 function renderQuestion() {
-  const area = document.getElementById('questionArea');
-  const q = quizQuestions[currentQ];
+  var area = document.getElementById('questionArea');
+  var q = quizQuestions[currentQ];
   document.getElementById('qNum').textContent = currentQ + 1;
   document.getElementById('totalQ').textContent = quizQuestions.length;
   document.getElementById('progressFill').style.width = ((currentQ) / (quizQuestions.length - 1)) * 100 + '%';
@@ -757,14 +757,12 @@ function renderQuestion() {
   document.getElementById('nextQBtn').style.display = currentQ === quizQuestions.length - 1 ? 'none' : 'inline-block';
   document.getElementById('submitQuizBtn').style.display = currentQ === quizQuestions.length - 1 ? 'inline-block' : 'none';
 
-  const val = answers[currentQ] || '';
-  area.innerHTML = \`
-    <div class="question-number">Question \${currentQ + 1}</div>
-    <div class="question-text">\${q.q}</div>
-    <textarea style="width:100%;padding:14px;border-radius:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);color:#e0e0e0;font-size:0.95rem;min-height:120px;font-family:inherit;outline:none;resize:vertical;" 
-      oninput="saveAnswer(\${currentQ}, this.value)" 
-      placeholder="Type your answer here...">\${val}</textarea>
-  \`;
+  var val = answers[currentQ] || '';
+  area.innerHTML = '<div class="question-number">Question ' + (currentQ + 1) + '</div>' +
+    '<div class="question-text">' + q.q + '</div>' +
+    '<textarea style="width:100%;padding:14px;border-radius:10px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);color:#e0e0e0;font-size:0.95rem;min-height:120px;font-family:inherit;outline:none;resize:vertical;" ' +
+    'oninput="saveAnswer(' + currentQ + ', this.value)" ' +
+    'placeholder="Type your answer here...">' + val + '</textarea>';
 }
 
 function saveAnswer(idx, value) { answers[idx] = value; }
@@ -778,25 +776,29 @@ function prevQuestion() {
 }
 
 function submitQuiz() {
-  const unanswered = quizQuestions.some((_, i) => !answers[i]?.trim());
+  var unanswered = false;
+  for (var i = 0; i < quizQuestions.length; i++) {
+    if (!answers[i] || answers[i].trim() === '') {
+      unanswered = true;
+      break;
+    }
+  }
   if (unanswered) { alert('Please answer all questions before submitting.'); return; }
   clearInterval(timerInterval);
-  const mins = Math.floor(timerSeconds / 60);
-  const secs = timerSeconds % 60;
-  const timeStr = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-  const area = document.getElementById('questionArea');
-  area.innerHTML = \`
-    <div class="result-container">
-      <div class="score-circle">
-        <span class="score-number">✅</span>
-        <span class="score-label">Completed</span>
-      </div>
-      <div class="result-message">🎉 Great job! You have completed the quiz.</div>
-      <div class="result-detail">You have answered all \${quizQuestions.length} questions thoughtfully.</div>
-      <div class="time-taken">⏱ Time taken: \${timeStr}</div>
-      <button class="restart-btn" onclick="restartQuiz()">🔄 Restart Quiz</button>
-    </div>
-  \`;
+  var mins = Math.floor(timerSeconds / 60);
+  var secs = timerSeconds % 60;
+  var timeStr = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+  var area = document.getElementById('questionArea');
+  area.innerHTML = '<div class="result-container">' +
+    '<div class="score-circle">' +
+      '<span class="score-number">✅</span>' +
+      '<span class="score-label">Completed</span>' +
+    '</div>' +
+    '<div class="result-message">🎉 Great job! You have completed the quiz.</div>' +
+    '<div class="result-detail">You have answered all ' + quizQuestions.length + ' questions thoughtfully.</div>' +
+    '<div class="time-taken">⏱ Time taken: ' + timeStr + '</div>' +
+    '<button class="restart-btn" onclick="restartQuiz()">🔄 Restart Quiz</button>' +
+  '</div>';
   document.getElementById('prevQBtn').style.display = 'none';
   document.getElementById('nextQBtn').style.display = 'none';
   document.getElementById('submitQuizBtn').style.display = 'none';
@@ -815,10 +817,10 @@ function restartQuiz() {
 
 function startTimer() {
   if (timerInterval) return;
-  timerInterval = setInterval(() => {
+  timerInterval = setInterval(function() {
     timerSeconds++;
-    const mins = Math.floor(timerSeconds / 60);
-    const secs = timerSeconds % 60;
+    var mins = Math.floor(timerSeconds / 60);
+    var secs = timerSeconds % 60;
     document.getElementById('timerDisplay').textContent = '⏱ ' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
   }, 1000);
 }
