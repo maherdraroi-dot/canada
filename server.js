@@ -2,9 +2,6 @@ const express = require('express');
 const compression = require('compression');
 const { getJobData, getJobSchema, TOTAL_JOBS, jobTitles, companies, canadaLocations, industries } = require('./jobData');
 
-// ─── IMPORT ADS FROM SEPARATE FILE ─────────────────────────────────────────
-const { AD_TOP, AD_MIDDLE, AD_BOTTOM } = require('./ads');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,7 +23,7 @@ function renderHTML({ title, meta, bodyContent, schema }) {
 <meta property="og:title" content="${title}"/>
 <meta property="og:description" content="${meta}"/>
 <meta name="robots" content="index, follow"/>
-${schema ? `<script type="application/ld+json">${JSON.stringify(schema, null, 2)}<\/script>` : ''}
+${schema ? `<script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>` : ''}
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#222;line-height:1.6}
@@ -115,9 +112,9 @@ footer a{color:#ffd700}
 .success-msg{display:none;text-align:center;padding:1rem;color:#2e7d32;font-weight:600}
 @media(max-width:600px){.search-bar{flex-direction:column}.stat-bar{gap:1rem}}
 </style>
+
 </head>
 <body>
-${AD_TOP}
 <nav>
   <a class="brand" href="/"><span>CA</span>NOVA<span>.ca</span></a>
   <div class="nav-links">
@@ -128,7 +125,6 @@ ${AD_TOP}
   </div>
 </nav>
 ${bodyContent}
-${AD_BOTTOM}
 <footer>
   &copy; 2025 CANOVA.ca — <strong>100,000 Jobs</strong> across Canada |
   <a href="/jobs">Browse All</a> · <a href="/jobs?type=remote">Remote Jobs</a> · <a href="/sitemap">Sitemap</a>
@@ -142,7 +138,7 @@ function openApply(title){
 </html>`;
 }
 
-// ─── HOME PAGE ─────────────────────────────────────────────────────────────────
+// ── HOME PAGE ─────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   const featuredIds = [1, 50001, 2, 50002, 3, 50003, 10000, 60000];
   const featuredJobs = featuredIds.map(id => getJobData(id));
@@ -210,7 +206,6 @@ app.get('/', (req, res) => {
   </div>
 </div>
 <div class="container">
-  ${AD_MIDDLE}
   <div class="info-box">
     🇨🇦 Canada's most comprehensive job board — browse <strong>50,000 remote jobs</strong> and <strong>50,000 on-site jobs</strong> across all industries.
   </div>
@@ -229,38 +224,271 @@ app.get('/', (req, res) => {
   }));
 });
 
-// ─── JOB LISTING PAGE ──────────────────────────────────────────────────────────
+// ── JOB LISTING PAGE ──────────────────────────────────────────────────────────
 app.get('/jobs', (req, res) => {
-  // ... (rest of your code remains same)
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const typeFilter = req.query.type || 'all';
+  const locationFilter = req.query.location || '';
+  const q = req.query.q || '';
+
+  let jobIds = [];
+  if (typeFilter === 'remote') {
+    const start = (page - 1) * JOBS_PER_PAGE + 1;
+    for (let i = start; i < start + JOBS_PER_PAGE && i <= 50000; i++) jobIds.push(i);
+  } else if (typeFilter === 'onsite') {
+    const start = 50000 + (page - 1) * JOBS_PER_PAGE + 1;
+    for (let i = start; i < start + JOBS_PER_PAGE && i <= TOTAL_JOBS; i++) jobIds.push(i);
+  } else {
+    const start = (page - 1) * JOBS_PER_PAGE + 1;
+    for (let i = start; i < start + JOBS_PER_PAGE && i <= TOTAL_JOBS; i++) jobIds.push(i);
+  }
+
+  const jobs = jobIds.map(id => getJobData(id));
+  const totalPages = Math.ceil(TOTAL_JOBS / JOBS_PER_PAGE);
+
+  const cards = jobs.map(job => `
+<a href="/jobs/${job.id}" style="display:block">
+<div class="job-card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">${job.title}</div>
+      <div class="card-company">${job.company}</div>
+    </div>
+    <div class="card-badges">
+      <span class="badge ${job.isRemote ? 'badge-remote' : 'badge-office'}">${job.isRemote ? '🌐 Remote' : '🏢 On-site'}</span>
+      <span class="badge badge-type">${job.jobType}</span>
+      <span class="badge badge-exp">${job.experience}</span>
+    </div>
+  </div>
+  <div class="card-meta">
+    <span>📍 ${job.location}</span>
+    <span>🏭 ${job.industry}</span>
+    <span>📅 ${job.postedDate}</span>
+  </div>
+  <div class="card-desc">${job.description.substring(0, 200)}...</div>
+  <div class="card-footer">
+    <span class="card-salary">${job.salary}</span>
+    <button class="btn-apply" onclick="event.preventDefault();openApply('${job.title.replace(/'/g, "\\'")} at ${job.company.replace(/'/g, "\\'")}')">Apply Now</button>
+  </div>
+</div>
+</a>`).join('');
+
+  const pages = [];
+  if (page > 1) pages.push(`<a href="/jobs?page=${page - 1}&type=${typeFilter}">← Prev</a>`);
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, page + 2);
+  if (start > 1) pages.push(`<a href="/jobs?page=1&type=${typeFilter}">1</a><span>…</span>`);
+  for (let p = start; p <= end; p++) {
+    pages.push(p === page
+      ? `<span class="current">${p}</span>`
+      : `<a href="/jobs?page=${p}&type=${typeFilter}">${p}</a>`);
+  }
+  if (end < totalPages) pages.push(`<span>…</span><a href="/jobs?page=${totalPages}&type=${typeFilter}">${totalPages.toLocaleString()}</a>`);
+  if (page < totalPages) pages.push(`<a href="/jobs?page=${page + 1}&type=${typeFilter}">Next →</a>`);
+
+  const body = `
+<div class="hero" style="padding:1.75rem 1.5rem">
+  <h1 style="font-size:1.8rem">Browse <span class="accent">100,000 Jobs</span> in Canada</h1>
+  <p>Showing page ${page.toLocaleString()} of ${totalPages.toLocaleString()}</p>
+</div>
+<div class="filter-row">
+  <a href="/jobs"><span class="filter-chip ${typeFilter==='all'?'active':''}">All Jobs (100,000)</span></a>
+  <a href="/jobs?type=remote"><span class="filter-chip ${typeFilter==='remote'?'active':''}">🌐 Remote (50,000)</span></a>
+  <a href="/jobs?type=onsite"><span class="filter-chip ${typeFilter==='onsite'?'active':''}">🏢 On-site (50,000)</span></a>
+</div>
+<div class="container">
+  <div class="page-grid">${cards}</div>
+  <div class="pagination">${pages.join('')}</div>
+</div>`;
+
+  res.send(renderHTML({
+    title: `Canada Jobs — Page ${page} of ${totalPages.toLocaleString()} | CANOVA.ca`,
+    meta: `Browse ${TOTAL_JOBS.toLocaleString()} jobs in Canada. Page ${page}. Remote and on-site positions across all industries.`,
+    bodyContent: body,
+    schema: null
+  }));
 });
 
-// ─── INDIVIDUAL JOB PAGE ───────────────────────────────────────────────────────
+// ── INDIVIDUAL JOB PAGE ───────────────────────────────────────────────────────
 app.get('/jobs/:id', (req, res) => {
-  // ... (rest of your code remains same)
+  const id = parseInt(req.params.id);
+  if (!id || id < 1 || id > TOTAL_JOBS) {
+    return res.status(404).send(renderHTML({
+      title: 'Job Not Found | CANOVA.ca',
+      meta: 'This job listing was not found.',
+      bodyContent: `<div class="container" style="text-align:center;padding:4rem 1.5rem"><h1>404 — Job Not Found</h1><p style="margin:1rem 0 2rem">This job may have been filled or removed.</p><a href="/jobs" style="color:#d62828">← Browse All Jobs</a></div>`,
+      schema: null
+    }));
+  }
+
+  const job = getJobData(id);
+  const schema = getJobSchema(job);
+
+  const relatedIds = [
+    Math.max(1, id - 2), Math.max(1, id - 1),
+    Math.min(TOTAL_JOBS, id + 1), Math.min(TOTAL_JOBS, id + 2)
+  ].filter(rid => rid !== id);
+  const relatedJobs = relatedIds.slice(0, 3).map(rid => getJobData(rid));
+
+  const relatedCards = relatedJobs.map(rj => `
+<a href="/jobs/${rj.id}" style="display:block">
+<div class="job-card" style="padding:1rem">
+  <div class="card-title" style="font-size:.95rem">${rj.title}</div>
+  <div class="card-company">${rj.company}</div>
+  <div style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap">
+    <span class="badge ${rj.isRemote ? 'badge-remote' : 'badge-office'}" style="font-size:.7rem">${rj.isRemote ? '🌐 Remote' : '🏢 On-site'}</span>
+    <span class="badge badge-type" style="font-size:.7rem">${rj.jobType}</span>
+  </div>
+</div>
+</a>`).join('');
+
+  const body = `
+<div class="container">
+  <div class="breadcrumb">
+    <a href="/">Home</a> › <a href="/jobs">Jobs</a> › <a href="/jobs?type=${job.isRemote ? 'remote' : 'onsite'}">${job.isRemote ? 'Remote' : 'On-site'}</a> › ${job.title}
+  </div>
+  <div class="job-detail">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem">
+      <div>
+        <h1>${job.title}</h1>
+        <p style="font-size:1.05rem;color:#555;margin-top:.35rem">${job.company} · ${job.industry}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
+        <span class="badge ${job.isRemote ? 'badge-remote' : 'badge-office'}" style="font-size:.85rem;padding:.4rem 1rem">${job.isRemote ? '🌐 Remote' : '🏢 On-site'}</span>
+        <span style="font-size:.8rem;color:#888">Job ID: CA-${String(job.id).padStart(6, '0')}</span>
+      </div>
+    </div>
+    <div class="detail-meta">
+      <span class="detail-chip highlight">💰 ${job.salary}</span>
+      <span class="detail-chip">📍 ${job.location}</span>
+      <span class="detail-chip">💼 ${job.jobType}</span>
+      <span class="detail-chip">📊 ${job.experience}</span>
+      <span class="detail-chip">🏭 ${job.industry}</span>
+      <span class="detail-chip">📅 Posted: ${job.postedDate}</span>
+    </div>
+    <div class="detail-body">${job.description}</div>
+    <div class="apply-section">
+      <h3>Ready to Apply?</h3>
+      <p>Submit your application for <strong>${job.title}</strong> at <strong>${job.company}</strong> — takes less than 2 minutes</p>
+      <button class="btn-apply-big" onclick="openApply('${job.title.replace(/'/g, "\\'")} at ${job.company.replace(/'/g, "\\'")}')">
+        Apply Now →
+      </button>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem">
+    <h2 style="font-size:1.1rem;margin-bottom:1rem">Similar Jobs You Might Like</h2>
+    <div class="page-grid">${relatedCards}</div>
+  </div>
+  <div style="text-align:center;margin-top:1.5rem">
+    <a href="/jobs" style="color:#d62828;font-weight:600">← Browse All 100,000 Jobs</a>
+  </div>
+</div>`;
+
+  res.send(renderHTML({
+    title: `${job.title} at ${job.company} — ${job.location} | CANOVA.ca`,
+    meta: `${job.title} job at ${job.company}. ${job.isRemote ? 'Remote' : job.location}. ${job.salary}. Apply now on CANOVA.ca.`,
+    bodyContent: body,
+    schema
+  }));
 });
 
-// ─── SITEMAP INDEX ─────────────────────────────────────────────────────────────
+// ── SITEMAP INDEX ─────────────────────────────────────────────────────────────
 app.get('/sitemap.xml', (req, res) => {
-  // ... (rest of your code remains same)
+  const totalSitemaps = 100;
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  for (let i = 1; i <= totalSitemaps; i++) {
+    xml += `\n<sitemap><loc>https://rightwing-production.up.railway.app/sitemap-${i}.xml</loc></sitemap>`;
+  }
+  xml += `\n</sitemapindex>`;
+  res.type('application/xml').send(xml);
 });
 
-// ─── SITEMAP HTML PAGE ─────────────────────────────────────────────────────────
+app.get('/sitemap-:num.xml', (req, res) => {
+  const num = parseInt(req.params.num);
+  if (!num || num < 1 || num > 100) return res.status(404).send('Not found');
+  const start = (num - 1) * 1000 + 1;
+  const end = Math.min(num * 1000, TOTAL_JOBS);
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  for (let i = start; i <= end; i++) {
+    xml += `\n<url><loc>https://rightwing-production.up.railway.app/jobs/${i}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
+  }
+  xml += `\n</urlset>`;
+  res.type('application/xml').send(xml);
+});
+
+// ── SITEMAP HTML PAGE ─────────────────────────────────────────────────────────
 app.get('/sitemap', (req, res) => {
-  // ... (rest of your code remains same)
+  const body = `
+<div class="container">
+  <h1 style="margin-bottom:1rem">Sitemap — CANOVA.ca</h1>
+  <div class="info-box">📌 100,000 individual job pages + XML sitemaps for all search engines</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem">
+    <div class="job-card">
+      <div class="card-title">Main Pages</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem;font-size:.88rem">
+        <a href="/" style="color:#d62828">🏠 Home</a>
+        <a href="/jobs" style="color:#d62828">📋 All Jobs (100,000)</a>
+        <a href="/jobs?type=remote" style="color:#d62828">🌐 Remote Jobs (50,000)</a>
+        <a href="/jobs?type=onsite" style="color:#d62828">🏢 On-site Jobs (50,000)</a>
+      </div>
+    </div>
+    <div class="job-card">
+      <div class="card-title">XML Sitemaps</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem;font-size:.88rem">
+        <a href="/sitemap.xml" style="color:#d62828">📄 Sitemap Index</a>
+        <a href="/sitemap-1.xml" style="color:#d62828">📄 Sitemap 1 (Jobs 1–1,000)</a>
+        <a href="/sitemap-2.xml" style="color:#d62828">📄 Sitemap 2 (Jobs 1,001–2,000)</a>
+        <span style="color:#888">… 100 sitemap files total</span>
+      </div>
+    </div>
+    <div class="job-card">
+      <div class="card-title">Job Pages Range</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem;font-size:.88rem">
+        <a href="/jobs/1" style="color:#d62828">Job #1 (First Remote Job)</a>
+        <a href="/jobs/50000" style="color:#d62828">Job #50,000 (Last Remote Job)</a>
+        <a href="/jobs/50001" style="color:#d62828">Job #50,001 (First On-site Job)</a>
+        <a href="/jobs/100000" style="color:#d62828">Job #100,000 (Last On-site Job)</a>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+  res.send(renderHTML({
+    title: 'Sitemap | CANOVA.ca',
+    meta: 'Complete sitemap of CANOVA.ca with 100,000 job listings across Canada.',
+    bodyContent: body,
+    schema: null
+  }));
 });
 
-// ─── ROBOTS.TXT ────────────────────────────────────────────────────────────────
+// ── ROBOTS.TXT ────────────────────────────────────────────────────────────────
 app.get('/robots.txt', (req, res) => {
-  // ... (rest of your code remains same)
+  res.type('text/plain').send(`User-agent: *
+Allow: /
+Sitemap: https://rightwing-production.up.railway.app/sitemap.xml
+Disallow: /api/`);
 });
 
-// ─── API ─────────────────────────────────────────────────────────────────────
+// ── API ─────────────────────────────────────────────────────────────────────
 app.get('/api/jobs/:id', (req, res) => {
-  // ... (rest of your code remains same)
+  const id = parseInt(req.params.id);
+  if (!id || id < 1 || id > TOTAL_JOBS) return res.status(404).json({ error: 'Job not found' });
+  const job = getJobData(id);
+  res.json({ job, schema: getJobSchema(job) });
 });
 
 app.get('/api/jobs', (req, res) => {
-  // ... (rest of your code remains same)
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(50, parseInt(req.query.limit) || 20);
+  const start = (page - 1) * limit + 1;
+  const jobs = [];
+  for (let i = start; i < start + limit && i <= TOTAL_JOBS; i++) {
+    jobs.push(getJobData(i));
+  }
+  res.json({ page, limit, total: TOTAL_JOBS, jobs });
 });
 
 app.listen(PORT, () => {
