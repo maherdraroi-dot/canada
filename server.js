@@ -180,7 +180,7 @@ ${AD_BOTTOM}
 </footer>
 <script>
 function openApply(title){
-  window.location.href='https://ruwmqs-uq.myshopify.com/pages/apply';
+  window.location.href='https://rightwing-production.up.railway.app/apply-now';
 }
 </script>
 </body>
