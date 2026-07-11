@@ -242,6 +242,7 @@ app.get('/', (req, res) => {
     <div class="stat"><strong>100+</strong><span>Companies</span></div>
   </div>
 </div>
+ ${AD_MIDDLE}
 <div class="container">
   <div class="info-box">
     🇨🇦 Canada's most comprehensive job board — browse <strong>50,000 remote jobs</strong> and <strong>50,000 on-site jobs</strong> across all industries.
