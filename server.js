@@ -161,6 +161,7 @@ ${AD_TOP}
     <a href="/sitemap">Sitemap</a>
   </div>
 </nav>
+${AD_MIDDLE}
 ${bodyContent}
 ${AD_BOTTOM}
 <footer>
